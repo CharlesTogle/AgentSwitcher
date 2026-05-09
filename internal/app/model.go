@@ -207,12 +207,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.activeSession = updated
 		m.status = "Reply received."
-		if msg.warning != "" {
-			m.status = "Reply received with warnings."
-			m.errText = msg.warning
-		} else {
-			m.errText = ""
-		}
+		m.errText = ""
 
 		if err := m.reloadActiveSession(); err != nil {
 			m.errText = err.Error()
@@ -795,6 +790,10 @@ func assistantMarkdownStyle() ansi.StyleConfig {
 	style := glamourstyles.DarkStyleConfig
 	white := "255"
 	style.Document.StylePrimitive.Color = &white
+	style.Document.StylePrimitive.BlockPrefix = ""
+	style.Document.StylePrimitive.BlockSuffix = ""
+	zero := uint(0)
+	style.Document.Margin = &zero
 	return style
 }
 

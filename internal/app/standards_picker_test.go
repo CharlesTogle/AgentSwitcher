@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	termansi "github.com/charmbracelet/x/ansi"
 )
 
 func TestStandardsPickerDirectoryFlowAndSelection(t *testing.T) {
@@ -108,5 +109,35 @@ func TestStandardsPickerCancel(t *testing.T) {
 	updated, _ := picker.Update(tea.KeyMsg{Type: tea.KeyEsc})
 	if !updated.Cancelled() {
 		t.Fatalf("expected picker to be cancelled")
+	}
+}
+
+func TestStandardsPickerRenderDirectoryBlockStacksInputBelowLabel(t *testing.T) {
+	projectDir := t.TempDir()
+	picker := NewStandardsPicker(projectDir, nil)
+	picker.directoryInput = "typed/path"
+	picker.directory = projectDir
+
+	lines := strings.Split(termansi.Strip(picker.renderDirectoryBlock()), "\n")
+
+	labelLine := -1
+	inputLine := -1
+	for i, line := range lines {
+		if labelLine == -1 && strings.Contains(line, "Directory") {
+			labelLine = i
+		}
+		if inputLine == -1 && strings.Contains(line, "typed/path") {
+			inputLine = i
+		}
+	}
+
+	if labelLine == -1 {
+		t.Fatalf("expected directory block to include label, got:\n%s", strings.Join(lines, "\n"))
+	}
+	if inputLine == -1 {
+		t.Fatalf("expected directory block to include input value, got:\n%s", strings.Join(lines, "\n"))
+	}
+	if inputLine <= labelLine {
+		t.Fatalf("expected directory input to render below the label, got:\n%s", strings.Join(lines, "\n"))
 	}
 }

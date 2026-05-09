@@ -25,7 +25,8 @@ func (p StandardsPicker) renderDirectoryBlock() string {
 	}
 
 	body := []string{
-		fmt.Sprintf("%s: %s", focusLabel, standardsPickerInputStyle.Render(p.directoryInput)),
+		focusLabel,
+		standardsPickerInputStyle.Render(renderDirectoryInputValue(p.directoryInput)),
 		fmt.Sprintf("Resolved: %s", standardsPickerMutedStyle.Render(relativeDirectoryDisplay(p.directory, p.projectDir))),
 	}
 
@@ -46,6 +47,13 @@ func (p StandardsPicker) renderDirectoryBlock() string {
 	}
 
 	return standardsPickerPanelStyle.Render(strings.Join(body, "\n"))
+}
+
+func renderDirectoryInputValue(input string) string {
+	if input == "" {
+		return " "
+	}
+	return input
 }
 
 func (p StandardsPicker) renderFileBlock() string {

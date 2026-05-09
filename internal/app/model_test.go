@@ -10,6 +10,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	termansi "github.com/charmbracelet/x/ansi"
 
 	"agentswitcher/internal/agent"
 	"agentswitcher/internal/store"
@@ -223,6 +224,12 @@ func TestAssistantMarkdownStyleUsesWhiteDocumentText(t *testing.T) {
 	if style.Document.StylePrimitive.Color == nil || *style.Document.StylePrimitive.Color != "255" {
 		t.Fatalf("expected white assistant document text, got %#v", style.Document.StylePrimitive.Color)
 	}
+	if style.Document.StylePrimitive.BlockPrefix != "" || style.Document.StylePrimitive.BlockSuffix != "" {
+		t.Fatalf("expected assistant document markdown to render without extra block padding, got prefix=%q suffix=%q", style.Document.StylePrimitive.BlockPrefix, style.Document.StylePrimitive.BlockSuffix)
+	}
+	if style.Document.Margin == nil || *style.Document.Margin != 0 {
+		t.Fatalf("expected assistant document markdown to render without side margins, got %#v", style.Document.Margin)
+	}
 
 	if style.Code.StylePrimitive.Color == nil || *style.Code.StylePrimitive.Color != "203" {
 		t.Fatalf("expected inline code styling to remain unchanged, got %#v", style.Code.StylePrimitive.Color)
@@ -230,5 +237,15 @@ func TestAssistantMarkdownStyleUsesWhiteDocumentText(t *testing.T) {
 
 	if style.CodeBlock.StyleBlock.StylePrimitive.Color == nil || *style.CodeBlock.StyleBlock.StylePrimitive.Color != "244" {
 		t.Fatalf("expected code block styling to remain unchanged, got %#v", style.CodeBlock.StyleBlock.StylePrimitive.Color)
+	}
+}
+
+func TestRenderMarkdownPlainTextHasNoLeadingPadding(t *testing.T) {
+	got := termansi.Strip(renderMarkdown("Opus 4.6, bro.", 72))
+	if strings.HasPrefix(got, "\n") || strings.HasPrefix(got, " ") {
+		t.Fatalf("expected plain assistant markdown to stay flush on the left, got %q", got)
+	}
+	if strings.TrimRight(got, " ") != "Opus 4.6, bro." {
+		t.Fatalf("expected plain assistant markdown content to remain unchanged, got %q", got)
 	}
 }

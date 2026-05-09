@@ -36,7 +36,10 @@ func TestBuildAgentPromptWithStandards(t *testing.T) {
 	got := buildAgentPromptWithStandards(session, standards, recent, "Add repo coverage")
 
 	wantContains := []string{
-		"You are continuing an existing codex conversation.",
+		"This conversation is agent-agnostic.",
+		"Treat it as one continuous conversation even if the selected runtime changes between turns.",
+		"Do not infer your current identity from prior assistant messages.",
+		"If the user asks about identity, model, or provider, explain that the conversation is agent-agnostic",
 		"External standards documents.",
 		"Standard file: /tmp/STANDARDS.md",
 		"Always write table-driven tests.",
@@ -52,6 +55,10 @@ func TestBuildAgentPromptWithStandards(t *testing.T) {
 		if !strings.Contains(got, want) {
 			t.Fatalf("prompt missing %q\nfull prompt:\n%s", want, got)
 		}
+	}
+
+	if strings.Contains(got, "existing codex conversation") {
+		t.Fatalf("prompt should not frame the conversation as agent-specific:\n%s", got)
 	}
 }
 
@@ -74,8 +81,10 @@ func TestBuildCompactionPromptWithStandardsExcludesStandardContent(t *testing.T)
 	got := buildCompactionPromptWithStandards(session, messages, standards)
 
 	wantContains := []string{
+		"This conversation is agent-agnostic, and the selected runtime may change over time.",
 		"Keep the summary under 600 words.",
 		"Do not summarize or restate external standards documents.",
+		"Do not preserve transient provider or model branding unless it materially affects future work.",
 		"Existing summary:\nPrevious summary.",
 		"Excluded external standards files:\n- /tmp/testing.md",
 		"[2026-05-09T02:00:00Z] USER:",
