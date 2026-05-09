@@ -1,0 +1,8 @@
+.codex
+.claude
+CLAUDE.md
+AGENTS.md
+*.db
+*.db-wal
+*.db-shm
+
